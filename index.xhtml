@@ -28,11 +28,19 @@
         this.dirty = true;
     }
     Color.prototype = {
-        colorspaces: [
-            { name: 'RGB', channels: ['r', 'g', 'b'] },
-            { name: 'HSL', channels: ['h', 's', 'l'] },
-            { name: 'HSV', channels: ['h', 't', 'v'] },
-        ],
+        colorspaces: [ {
+            name: 'RGB',
+            channels: ['r', 'g', 'b'],
+            channel_names: ['Red', 'Green', 'Blue'],
+        }, {
+            name: 'HSL',
+            channels: ['h', 's', 'l'],
+            channel_names: ['Hue', 'Saturation', 'Lightness'],
+        }, {
+            name: 'HSV',
+            channels: ['h', 't', 'v'],
+            channel_names: ['Hue', 'Saturation', 'Value'],
+        } ],
 
         // to_hex()
         // Returns the color this object represents formatted as a typical
@@ -273,14 +281,9 @@
 
         // Adjust background and label for current-color box.
         var hex = current_color.to_hex();
-        $('#current-color').css('background-color', hex);
-        var color_color = 'white';
-        if (current_color.l > 0.5)
-            // Lighter colors need a darker label
-            color_color = 'black';
-        $('#current-color .color')
-            .text(hex)
-            .css('color', color_color);
+        $('#current-color #color-name').text(hex);
+        $('#current-color #color-background').css('background-color', hex);
+        $('#current-color #color-text').css('color', hex);
 
         // Iterate over each channel on the page
         for (var cs in Color.prototype.colorspaces) {
@@ -321,19 +324,20 @@
             var colorspace = Color.prototype.colorspaces[cs];
             var cs_name = colorspace.name.toLowerCase();
 
-            // Headers are fairly simple
-            $(document.body).append('<h1>' + colorspace.name + '</h1>');
+            var $colorspace_el = $('<div class="colorspace"></div>');
+            $(document.body).append($colorspace_el);
 
             for (var c in colorspace.channels) {
                 var channel = colorspace.channels[c];
+                var channel_name = colorspace.channel_names[c];
                 var id = cs_name + '-' + channel;
 
                 // There's a lot of SVG stuff to insert and DOM manipulation
                 // is unreadable garbage, so just shove in an HTML fragment
                 // (n.b.: backslashes needed because ; in JS is optional)
-                $(document.body).append(' \
+                $colorspace_el.append(' \
 <div class="slider-row" id="' + id + '"> \
-    <div class="label">' + channel.toUpperCase() + '</div> \
+    <div class="label">' + channel_name + '</div> \
     <div class="value">100%</div> \
     <div class="slider"> \
         <div class="marker"></div> \
@@ -355,7 +359,7 @@
                     stop_ct = 7;
                 else if (channel == 'l')
                     stop_ct = 3;
-                var svg_doc = $(document.getElementById(id)).find('svg').get(0).ownerDocument;
+                var svg_doc = $colorspace_el.find('#' + id + ' svg').get(0).ownerDocument;
                 for (var i = 1; i <= stop_ct; i++) {
                     var stop = svg_doc.createElementNS('http://www.w3.org/2000/svg', 'stop');
                     stop.setAttributeNS(null, 'offset', (i - 1) / (stop_ct - 1));
@@ -498,39 +502,49 @@ blockquote, q {
 }
 </style>
 <style type="text/css">
-#current-color { margin: 1em; /*dyn*/ background: red; height: 2em; }
-#current-color .label { float: left; background: white; padding: 0.5em; }
-#current-color .color { line-height: 2em; vertical-align: middle; padding: 0.5em; }
+#current-color { margin: 1em; }
+#current-color #color-name { padding: 0.5em; }
+#current-color #color-background,
+#current-color #color-text { min-height: 3em; padding: 0.5em; line-height: 1.33; }
+#current-color #color-background { color: transparent; background-color: gold; }
+#current-color #color-text { display: none; color: gold; background-color: transparent; }
 
 #buttons { text-align: center; }
 #buttons { font-size: 0.8em; }
 
-h1 { margin: 1em; margin-top: 2em; border-bottom: 1px solid black; }
-
+.colorspace { margin: 3em 1em; }
 .slider-row { margin: 1em; }
-.slider-row > * { height: 1.5em; line-height: 1.5em; }
+.slider-row > * { height: 2em; line-height: 2em; }
 .slider-row:after { content: 'v'; display: block; height: 0; visibility: hidden; clear: both; }
-.slider-row .label { width: 2em; text-align: center; float: left; }
-.slider-row .value { width: 5em; text-align: center; float: right; }
-.slider-row .slider { position: relative; margin-left: 2em; margin-right: 5em; background-color: rgba(0%, 100%, 0%, 0.5); }
-.slider-row .slider svg { outline: 1px solid #999; }
-.slider-row .slider .marker { position: absolute; top: -0.5em; left: 0; margin-left: -0.5em; border-top: 0.5em solid #999; border-left: 0.5em solid transparent; border-right: 0.5em solid transparent; }
+.slider-row .label { width: 6em; text-align: left; float: left; }
+.slider-row .value { width: 5em; text-align: right; float: right; }
+.slider-row .slider { position: relative; margin-left: 6em; margin-right: 5em; background-color: rgba(0%, 100%, 0%, 0.5); }
+.slider-row .slider svg { }
+.slider-row .slider .marker { position: absolute; top: 0; left: 0; height: 2em; width: 1px; margin: -0.25em; border: 0.25em solid rgba(50%, 50%, 50%, 0.5); }
 </style>
 </head>
 
 
 <body>
 <div id="current-color">
-    <span class="label">Current color:</span>
-    <span class="color">hi</span>
+    <div id="color-name"></div>
+    <div id="color-background">
+        lorem ipsum dolor sit amet, consectetur adipiscing elit
+    </div>
+    <div id="color-text">
+        lorem ipsum dolor sit amet, consectetur adipiscing elit
+    </div>
 </div>
 <div id="buttons">
+    Load:
     <button id="js-from-hex">From hex triplet</button>
     <button id="js-randomize">Randomize</button>
-    |
+    <br />
+    Alter:
     <button id="js-invert">Invert</button>
     <button id="js-complement">Complement</button>
 </div>
+<div id="sidebar"></div>
 </body>
 </html>
 
