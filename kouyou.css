@@ -1,0 +1,19 @@
+#current-color { margin: 1em; }
+#current-color #color-name { padding: 0.5em; }
+#current-color #color-background,
+#current-color #color-text { min-height: 3em; padding: 0.5em; line-height: 1.33; }
+#current-color #color-background { color: transparent; background-color: gold; }
+#current-color #color-text { display: none; color: gold; background-color: transparent; }
+
+#buttons { text-align: center; }
+#buttons { font-size: 0.8em; }
+
+.colorspace { margin: 3em 1em; }
+.slider-row { margin: 1em; }
+.slider-row > * { height: 2em; line-height: 2em; }
+.slider-row:after { content: 'v'; display: block; height: 0; visibility: hidden; clear: both; }
+.slider-row .label { width: 6em; text-align: left; float: left; }
+.slider-row .value { width: 5em; text-align: right; float: right; }
+.slider-row .slider { position: relative; margin-left: 6em; margin-right: 5em; background-color: rgba(0%, 100%, 0%, 0.5); }
+.slider-row .slider svg { }
+.slider-row .slider .marker { position: absolute; top: 0; left: 0; height: 2em; width: 1px; margin: -0.25em; border: 0.25em solid rgba(50%, 50%, 50%, 0.5); }
