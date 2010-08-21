@@ -149,7 +149,11 @@
             this.r = parseInt(rgb[1], 16) / 255;
             this.g = parseInt(rgb[2], 16) / 255;
             this.b = parseInt(rgb[3], 16) / 255;
+
+            // Mark dirty, AND undefine saturation to force it to be recalculated
             this.dirty = true;
+            this.s = undefined;
+            this.t = undefined;
 
             return true;
         },
@@ -188,9 +192,10 @@
             }
 
             this.dirty = true;
+            this.t = undefined;
         },
 
-        // from_hsv(h, s, l)
+        // from_hsv(h, t, v)
         // Well, duh.
         from_hsv: function(h, t, v) {
             // Modified slightly from http://en.wikipedia.org/wiki/HSL_and_HSV
@@ -239,6 +244,7 @@
             }
 
             this.dirty = true;
+            this.s = undefined;
         },
 
         // -- Utilities --
