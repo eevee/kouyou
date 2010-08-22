@@ -263,17 +263,24 @@ Color.prototype = {
 
 var current_color = new Color(0, 0, 0);
 
+// refresh_color_display()
+// Updates the display of the current color.
+function refresh_color_display() {
+    current_color._recalc();
+
+    var hex = current_color.to_hex();
+    $('#current-color #color-name').text(hex);
+    $('#current-color #color-background').css('background-color', hex);
+    $('#current-color #color-text').css('color', hex);
+}
+
 // update_color()
 // Synchronizes the page contents with the current color.  Sliders,
 // gradients, the current color box, and so forth are updated.
 function update_color() {
     current_color._recalc();
 
-    // Adjust background and label for current-color box.
-    var hex = current_color.to_hex();
-    $('#current-color #color-name').text(hex);
-    $('#current-color #color-background').css('background-color', hex);
-    $('#current-color #color-text').css('color', hex);
+    refresh_color_display();
 
     // Iterate over each channel on the page
     for (var cs in Color.prototype.colorspaces) {
@@ -284,8 +291,7 @@ function update_color() {
             var id = cs_name + '-' + channel;
 
             // Update value and marker position
-            $('#' + id + ' .value').text(Math.round(current_color[channel] * 10000) / 100 + '%');
-            $('#' + id + ' .marker').css('left', current_color[channel] * 100 + '%');
+            update_slider(colorspace, channel);
 
             // Iterate over stops and update their colors, using assume()
             // to see what they *would* be if the slider were there.  Note
@@ -301,6 +307,25 @@ function update_color() {
             }
         }
     }
+}
+
+// update_slider(cs, channel)
+// Updates the marker position and numeric value for this channel.
+function update_slider(cs, channel) {
+    var id = cs.name.toLowerCase() + '-' + channel;
+    $('#' + id + ' .value').text(Math.round(current_color[channel] * 10000) / 100 + '%');
+    $('#' + id + ' .marker').css('left', current_color[channel] * 100 + '%');
+}
+
+// delayed_update_color()
+// Updates the gradients after a short delay, but only once.
+function delayed_update_color() {
+    var _QUEUE = 'delayed_update_color';
+    $(document.body)
+        .clearQueue(_QUEUE)
+        .delay(500, _QUEUE)
+        .queue(_QUEUE, update_color)
+        .dequeue(_QUEUE);
 }
 
 // --- Event handlers ---
@@ -376,6 +401,8 @@ function mousedown(event) {
     current_slider = el;
     event.preventDefault();
     mousemove(event);
+
+    // XXX don't mousemove; update_color()
 }
 
 // mousemove
@@ -390,7 +417,12 @@ function mousemove(event) {
 
     var parts = current_slider.parentNode.id.split('-');
     current_color['set_' + parts[1]](pct);
-    update_color();
+
+    // To make mouse movement smooth: update the display of the color, but do
+    // NOT redraw all the other gradients until the mouse stops movie
+    refresh_color_display();
+    // XXX: update_slider()
+    delayed_update_color();
 }
 
 // mouseup
