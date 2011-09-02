@@ -299,12 +299,24 @@ function update_color() {
             // the rainbow and needs several stops, whereas lightness runs
             // from black to a full color and then back to white, needing
             // an extra stop in the middle.
-            var stops = $('#' + id + ' stop');
+            var stop_ct = 2;
+            if (channel == 'h')
+                stop_ct = 7;
+            else if (channel == 'l')
+                stop_ct = 3;
+
+            var $canvas = $('#' + id + ' canvas');
+            var ctx = $canvas[0].getContext('2d');
+
+            var grad = ctx.createLinearGradient(0, 0, 100, 0);
             var assumption = {};
-            for (var i = 0; i < stops.length; i++) {
-                assumption[channel] = i / (stops.length - 1);
-                stops.get(i).setAttributeNS(null, 'stop-color', current_color.assume(assumption, cs_name).to_hex());
+            for (var i = 0; i < stop_ct; i++) {
+                var offset = i / (stop_ct - 1);
+                assumption[channel] = offset;
+                grad.addColorStop(offset, current_color.assume(assumption, cs_name).to_hex());
             }
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 100, 100);
         }
     }
 }
@@ -320,6 +332,8 @@ function update_slider(cs, channel) {
 // delayed_update_color()
 // Updates the gradients after a short delay, but only once.
 function delayed_update_color() {
+    // XXX is this still needed?  canvas is pretty quick.
+    // update_color(); return;
     var _QUEUE = 'delayed_update_color';
     $(document.body)
         .clearQueue(_QUEUE)
@@ -347,7 +361,7 @@ function create_sliders() {
             var channel_name = colorspace.channel_names[c];
             var id = cs_name + '-' + channel;
 
-            // There's a lot of SVG stuff to insert and DOM manipulation
+            // There's a lot of stuff to insert and DOM manipulation
             // is unreadable garbage, so just shove in an HTML fragment
             // (n.b.: backslashes needed because ; in JS is optional)
             $colorspace_el.append(' \
@@ -356,31 +370,10 @@ function create_sliders() {
 <div class="value">100%</div> \
 <div class="slider"> \
     <div class="marker"></div> \
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio="none"> \
-        <defs> \
-            <linearGradient id="grad-' + id + '"/> \
-        </defs> \
-        <rect x="0" y="0" width="10" height="10" fill="url(#grad-' + id + ')"/> \
-    </svg> \
+    <canvas height="100" width="100"></canvas> \
 </div> \
 </div> \
             ');
-
-            // Create the stops for this channel, space them equally, and
-            // give them default values; hue and lightness are special
-            // cases, as mentioned above
-            var stop_ct = 2;
-            if (channel == 'h')
-                stop_ct = 7;
-            else if (channel == 'l')
-                stop_ct = 3;
-            var svg_doc = $colorspace_el.find('#' + id + ' svg').get(0).ownerDocument;
-            for (var i = 1; i <= stop_ct; i++) {
-                var stop = svg_doc.createElementNS('http://www.w3.org/2000/svg', 'stop');
-                stop.setAttributeNS(null, 'offset', (i - 1) / (stop_ct - 1));
-                stop.setAttributeNS(null, 'stop-color', '#999999');
-                svg_doc.getElementById('grad-' + id).appendChild(stop);
-            }
         }
     }
 }
