@@ -34,9 +34,9 @@ Color.prototype = {
     // HTML hex triple, i.e. #rrggbb.
     to_hex: function() {
         return '#' +
-            ('0' + Math.floor(this.r * 255 + 0.5).toString(16)).substr(-2) +
-            ('0' + Math.floor(this.g * 255 + 0.5).toString(16)).substr(-2) +
-            ('0' + Math.floor(this.b * 255 + 0.5).toString(16)).substr(-2);
+            ('0' + Math.floor((this.r || 0) * 255 + 0.5).toString(16)).substr(-2) +
+            ('0' + Math.floor((this.g || 0) * 255 + 0.5).toString(16)).substr(-2) +
+            ('0' + Math.floor((this.b || 0) * 255 + 0.5).toString(16)).substr(-2);
     },
 
     // -- Setters --
@@ -95,29 +95,38 @@ Color.prototype = {
         var min = Math.min(this.r, this.g, this.b);
         var equal = max - min < 0.000001;  // lol floats
         if (equal) {
-            if (this.h == undefined) this.h = 0;
-        } else if (max == this.r)
+            if (this.h === null) this.h = 0;
+        }
+        else if (max === this.r) {
             this.h = 1/6 * (this.g - this.b) / (max - min) + 1;
-        else if (max == this.g)
+        }
+        else if (max === this.g) {
             this.h = 1/6 * (this.b - this.r) / (max - min) + 1/3;
-        else if (max == this.b)
+        }
+        else if (max === this.b) {
             this.h = 1/6 * (this.r - this.g) / (max - min) + 2/3;
+        }
 
         this.h = this.h % 1;
 
         this.l = (min + max) / 2;
 
         if (equal) {
-            if (this.s == undefined) this.s = 0;
-        } else if (this.l <= 1/2)
+            if (this.s === null) this.s = 0;
+        }
+        else if (this.l <= 1/2) {
             this.s = (max - min) / (max + min);
-        else
+        }
+        else {
             this.s = (max - min) / (2 - (max + min));
+        }
 
         if (max == 0) {
-            if (this.t == undefined) this.t = 0;
-        } else
+            if (this.t === null) this.t = 0;
+        }
+        else {
             this.t = 1 - min / max;
+        }
 
         this.v = max;
 
@@ -131,7 +140,7 @@ Color.prototype = {
         var re = new RegExp(/^\s*#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})\s*$/i);
         var rgb = re.exec(triplet);
 
-        if (rgb == null) return false;
+        if (rgb === null) return false;
 
         this.r = parseInt(rgb[1], 16) / 255;
         this.g = parseInt(rgb[2], 16) / 255;
@@ -139,8 +148,8 @@ Color.prototype = {
 
         // Mark dirty, AND undefine saturation to force it to be recalculated
         this.dirty = true;
-        this.s = undefined;
-        this.t = undefined;
+        this.s = null;
+        this.t = null;
 
         return true;
     },
@@ -155,10 +164,12 @@ Color.prototype = {
         this.l = l;
 
         var q;
-        if (l < 0.5)
+        if (l < 0.5) {
             q = l * (1 + s);
-        else
+        }
+        else {
             q = l + s - (l * s);
+        }
 
         var p = 2 * l - q;
 
@@ -168,18 +179,22 @@ Color.prototype = {
         t.b = (h + 2/3) % 1;
 
         for (var ch in t) {
-            if (t[ch] < 1/6)
+            if (t[ch] < 1/6) {
                 this[ch] = p + ((q - p) * 6 * t[ch]);
-            else if (t[ch] < 1/2)
+            }
+            else if (t[ch] < 1/2) {
                 this[ch] = q;
-            else if (t[ch] < 2/3)
+            }
+            else if (t[ch] < 2/3) {
                 this[ch] = p + ((q - p) * 6 * (2/3 - t[ch]));
-            else
+            }
+            else {
                 this[ch] = p;
+            }
         }
 
         this.dirty = true;
-        this.t = undefined;
+        this.t = null;
     },
 
     // from_hsv(h, t, v)
@@ -231,7 +246,7 @@ Color.prototype = {
         }
 
         this.dirty = true;
-        this.s = undefined;
+        this.s = null;
     },
 
     // -- Utilities --
@@ -243,8 +258,9 @@ Color.prototype = {
         // just returns a shallow copy of Foo.prototype.  Thus, to clone
         // an object with only scalar properties, do the same thing
         var other = {};
-        for (var key in this)
+        for (var key in this) {
             other[key] = this[key];
+        }
         return other;
     },
 
@@ -303,10 +319,12 @@ function update_color() {
             // from black to a full color and then back to white, needing
             // an extra stop in the middle.
             var stop_ct = 2;
-            if (channel == 'h')
+            if (channel === 'h') {
                 stop_ct = 7;
-            else if (channel == 'l')
+            }
+            else if (channel === 'l'){
                 stop_ct = 3;
+            }
 
             var $canvas = $('#' + id + ' canvas');
             var ctx = $canvas[0].getContext('2d');
@@ -328,8 +346,9 @@ function update_color() {
 // Updates the marker position and numeric value for this channel.
 function update_slider(cs, channel) {
     var id = cs.name.toLowerCase() + '-' + channel;
-    $('#' + id + ' .value').text(Math.round(current_color[channel] * 10000) / 100 + '%');
-    $('#' + id + ' .marker').css('left', current_color[channel] * 100 + '%');
+    var value = current_color[channel] || 0;
+    $('#' + id + ' .value').text(Math.round(value * 10000) / 100 + '%');
+    $('#' + id + ' .marker').css('left', value * 100 + '%');
 }
 
 // delayed_update_color()
@@ -433,13 +452,15 @@ function mouseup(event) {
 // Sets the current color to the specified hex triplet.
 function get_from_hex() {
     var hex = prompt("Enter a hex triplet in the form #rrggbb:");
-    if (hex == null) return;
+    if (! hex) return;
 
     var success = current_color.from_hex(hex);
-    if (success)
+    if (success) {
         update_color();
-    else
+    }
+    else {
         alert("Invalid color.");
+    }
 }
 
 // do_to_color(method)
