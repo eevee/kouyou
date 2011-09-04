@@ -351,19 +351,6 @@ function update_slider(cs, channel) {
     $('#' + id + ' .marker').css('left', value * 100 + '%');
 }
 
-// delayed_update_color()
-// Updates the gradients after a short delay, but only once.
-function delayed_update_color() {
-    // XXX is this still needed?  canvas is pretty quick.
-    // update_color(); return;
-    var _QUEUE = 'delayed_update_color';
-    $(document.body)
-        .clearQueue(_QUEUE)
-        .delay(500, _QUEUE)
-        .queue(_QUEUE, update_color)
-        .dequeue(_QUEUE);
-}
-
 // --- Event handlers ---
 
 // create_sliders()
@@ -437,7 +424,7 @@ function mousemove(event) {
     // NOT redraw all the other gradients until the mouse stops movie
     refresh_color_display();
     // XXX: update_slider()
-    delayed_update_color();
+    update_color();
 }
 
 // mouseup
