@@ -269,7 +269,7 @@ function refresh_color_display() {
     current_color._recalc();
 
     var hex = current_color.to_hex();
-    $('#current-color #color-name').text(hex);
+    $('#current-color #color-identifiers').text(hex);
     $('#current-color #color-background').css('background-color', hex);
     $('#current-color #color-text').css('color', hex);
 }
@@ -354,7 +354,7 @@ function create_sliders() {
         var cs_name = colorspace.name.toLowerCase();
 
         var $colorspace_el = $('<div class="colorspace"></div>');
-        $(document.body).append($colorspace_el);
+        $('#color-picker').append($colorspace_el);
 
         for (var c in colorspace.channels) {
             var channel = colorspace.channels[c];

@@ -18,25 +18,36 @@
     <link rel="stylesheet" type="text/css" href="kouyou.css">
 </head>
 <body>
-<div id="current-color">
-    <div id="color-name"></div>
-    <div id="color-background">
-        lorem ipsum dolor sit amet, consectetur adipiscing elit
+    <div id="main">
+        <div id="current-color">
+            <div id="color-identifiers"></div>
+            <div id="color-demo">
+                <div id="color-background">
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit
+                </div>
+                <div id="color-text">
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit
+                </div>
+            </div>
+        </div>
+        <div id="color-picker"></div>
+        <div id="buttons">
+            <div id="buttons-left">
+                <button id="js-from-hex">From hex triplet</button>
+                <button id="js-randomize">Randomize</button>
+            </div>
+            <div id="buttons-right">
+                <button id="js-invert">Invert</button>
+                <button id="js-complement">Complement</button>
+            </div>
+        </div>
     </div>
-    <div id="color-text">
-        lorem ipsum dolor sit amet, consectetur adipiscing elit
+    <div id="sidebar">
+        <div class="section">common colors  <!-- XXX common css colors? --></div>
+        <div class="section">your colors</div>
+        <div class="section">history</div>
+        <div class="section">blender</div>
     </div>
-</div>
-<div id="buttons">
-    Load:
-    <button id="js-from-hex">From hex triplet</button>
-    <button id="js-randomize">Randomize</button>
-    <br />
-    Alter:
-    <button id="js-invert">Invert</button>
-    <button id="js-complement">Complement</button>
-</div>
-<div id="sidebar"></div>
 </body>
 </html>
 
