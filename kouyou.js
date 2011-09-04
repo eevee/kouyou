@@ -133,20 +133,34 @@ Color.prototype = {
         this.dirty = false;
     },
 
-    // from_hex(triplet)
-    // Parses a hex triplet.  Returns true on success.
-    from_hex: function(triplet) {
-        // For some reason, (xxx) with a multiplier does not work right
-        var re = new RegExp(/^\s*#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})\s*$/i);
-        var rgb = re.exec(triplet);
+    // parse_color(str)
+    // Parses a CSS color.  Returns true on success.
+    parse_color: function(str) {
+        // Create a dummy DOM node and let the browser parse for us
+        var parsed_color = $('<div>')
+            .css('background-color', 'transparent')
+            .css('background-color', str)
+            .css('background-color');
 
-        if (rgb === null) return false;
+        if (parsed_color === 'transparent') {
+            // Junk entered
+            return false;
+        }
 
-        this.r = parseInt(rgb[1], 16) / 255;
-        this.g = parseInt(rgb[2], 16) / 255;
-        this.b = parseInt(rgb[3], 16) / 255;
+        // TODO do all browsers normalize like this?
+        var re = /^rgba?[(](\d+), (\d+), (\d+)(?:, [0-9.]+)?[)]$/;
+        var rgba = re.exec(parsed_color);
+        if (rgba === null) {
+            return false;
+        }
+
+        this.r = parseInt(rgba[1], 10) / 255;
+        this.g = parseInt(rgba[2], 10) / 255;
+        this.b = parseInt(rgba[3], 10) / 255;
+        // TODO support alpha?
 
         // Mark dirty, AND undefine saturation to force it to be recalculated
+        // TODO it would be nice to preserve the saturation if the user entered hsl()
         this.dirty = true;
         this.s = null;
         this.t = null;
@@ -435,13 +449,13 @@ function mouseup(event) {
 
 // --- Buttons ---
 
-// get_from_hex()
-// Sets the current color to the specified hex triplet.
-function get_from_hex() {
-    var hex = prompt("Enter a hex triplet in the form #rrggbb:");
-    if (! hex) return;
+// parse_color()
+// Sets the current color to a given CSS color value.
+function parse_color() {
+    var value = prompt("Enter a color value.");
+    if (! value) return;
 
-    var success = current_color.from_hex(hex);
+    var success = current_color.parse_color(value);
     if (success) {
         update_color();
     }
@@ -468,7 +482,7 @@ $( function() {
     $(document).mouseup(mouseup);
 
     // Buttons
-    $('#js-from-hex').click(get_from_hex);
+    $('#js-parse').click(parse_color);
     $('#js-randomize').click(function() { do_to_color('randomize') });
     $('#js-invert').click(function() { do_to_color('invert') });
     $('#js-complement').click(function() { do_to_color('complement') });
