@@ -1,3 +1,6 @@
+(function(){  // namespace
+"use strict";
+
 // Color(red, green, blue)
 // Constructor for a color object.
 // Every channel is available as a property, although currently the HSL
@@ -164,7 +167,7 @@ Color.prototype = {
         t.g = h;
         t.b = (h + 2/3) % 1;
 
-        for (ch in t) {
+        for (var ch in t) {
             if (t[ch] < 1/6)
                 this[ch] = p + ((q - p) * 6 * t[ch]);
             else if (t[ch] < 1/2)
@@ -462,3 +465,6 @@ $( function() {
     $('#js-invert').click(function() { do_to_color('invert') });
     $('#js-complement').click(function() { do_to_color('complement') });
 } );
+
+
+})();  // end namespace
